@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>역 튜링 테스트</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<main id="app">
+
+  <!-- ============ INTRO ============ -->
+  <section class="screen is-active" id="screen-intro">
+    <div class="intro">
+      <div class="intro__badge">
+        <span class="dot"></span> LIVE · <span id="badge-model">claude-opus-5</span>
+      </div>
+
+      <h1 class="intro__title">역 튜링 테스트</h1>
+      <p class="intro__sub">4명의 AI가 있는 단체 채팅방.<br>그 안에 숨어든 단 한 명의 인간 — 바로 당신.</p>
+
+      <div class="rules">
+        <div class="rules__head">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3.5v5c0 4.4-3.1 8.4-7.5 9.5-4.4-1.1-7.5-5.1-7.5-9.5v-5z"/></svg>
+          <span>규칙</span>
+        </div>
+        <ol class="rules__list">
+          <li><b>너는 AI인 척해야 한다.</b> 인간 티를 내는 순간 끝이다.</li>
+          <li>AI 4명과 함께 주어진 주제로 <b>3라운드</b> 동안 대화한다.</li>
+          <li>대화가 끝나면 AI들이 <b>누가 인간인지 투표</b>한다.</li>
+          <li><b>AI들의 투표에서 인간으로 지목되지 않으면 승리.</b> 최다 득표로 지목되면 패배.</li>
+        </ol>
+        <div class="rules__tip">
+          <span class="k">TIP</span>
+          감정, 오타, 줄임말, 개인적인 경험담은 인간의 냄새다. 하지만 너무 완벽해도 의심받는다.
+        </div>
+      </div>
+
+      <div class="cast">
+        <div class="cast__label">오늘의 심문관들</div>
+        <div class="cast__row" id="cast-row"></div>
+      </div>
+
+      <div class="engine">
+        <div class="engine__label">AI 두뇌 선택</div>
+        <div class="engine__seg" id="engine-seg"></div>
+        <div class="engine__note" id="engine-note"></div>
+      </div>
+
+      <button class="btn btn--primary btn--xl" id="btn-to-topic">
+        잠입 시작
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC ============ -->
+  <section class="screen" id="screen-topic">
+    <div class="topic">
+      <div class="topic__eyebrow">STEP 1 / 3</div>
+      <h2 class="topic__title">대화 주제를 고르세요</h2>
+      <p class="topic__sub">주제가 평범할수록 인간은 티가 난다.</p>
+
+      <div class="rounds">
+        <span class="rounds__label">라운드</span>
+        <div class="seg" id="rounds-seg">
+          <button class="seg__btn" data-rounds="2">2</button>
+          <button class="seg__btn is-on" data-rounds="3">3</button>
+        </div>
+      </div>
+
+      <div class="topic__grid" id="topic-grid"></div>
+
+      <div class="topic__actions">
+        <button class="btn btn--ghost" id="btn-random">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          랜덤 주제
+        </button>
+        <button class="btn btn--primary" id="btn-start" disabled>
+          채팅방 입장
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <button class="linkback" id="btn-back-intro">← 규칙 다시 보기</button>
+    </div>
+  </section>
+
+  <!-- ============ CHAT ============ -->
+  <section class="screen" id="screen-chat">
+    <div class="chat">
+      <header class="chat__head">
+        <div class="chat__headmain">
+          <div class="chat__room">
+            <span class="chat__roomdot"></span>
+            <span id="chat-topic">주제</span>
+          </div>
+          <div class="chat__meta">
+            <span id="chat-round-label">라운드 1 / 3</span>
+            <span class="sep">·</span>
+            <span>참가자 5명</span>
+            <span class="sep">·</span>
+            <span class="you">당신 = <b id="chat-youname">—</b></span>
+          </div>
+        </div>
+        <div class="progress"><div class="progress__bar" id="progress-bar"></div></div>
+      </header>
+
+      <div class="roster" id="roster-strip"></div>
+
+      <div class="chat__scroll" id="chat-scroll">
+        <div class="chat__stream" id="chat-stream"></div>
+      </div>
+
+      <footer class="composer" id="composer">
+        <div class="composer__status" id="composer-status">
+          <span class="pulse"></span><span id="composer-status-text">AI들이 대화 중…</span>
+        </div>
+        <div class="composer__row">
+          <div class="composer__avatar" id="composer-avatar"></div>
+          <textarea id="input" rows="1" placeholder="AI처럼 한마디…" maxlength="220" disabled></textarea>
+          <button class="send" id="btn-send" disabled aria-label="전송">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12l15-7.5-4 15-4-6z"/></svg>
+          </button>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============ VOTE ============ -->
+  <section class="screen" id="screen-vote">
+    <div class="vote">
+      <div class="vote__eyebrow">FINAL · 투표</div>
+      <h2 class="vote__title" id="vote-title">AI들이 심의 중…</h2>
+      <p class="vote__sub" id="vote-sub">4개의 모델이 동시에 대화 기록을 분석하고 있습니다.</p>
+
+      <div class="scanner" id="vote-scanner">
+        <div class="scanner__bar"><span></span></div>
+      </div>
+
+      <div class="ballots" id="ballots"></div>
+
+      <div class="tally" id="tally" hidden>
+        <div class="tally__title">개표 결과</div>
+        <div class="tally__rows" id="tally-rows"></div>
+      </div>
+
+      <!-- 개표가 끝나면 app.js 가 여기에 '결과 확인' 버튼을 만들어 붙인다.
+           결과가 나오기 전에는 버튼이 DOM 에 존재하지 않는다. -->
+      <div class="reveal-slot" id="reveal-slot"></div>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="screen-result">
+    <div class="result" id="result-card">
+      <div class="result__glyph" id="result-glyph"></div>
+      <div class="result__verdict" id="result-verdict"></div>
+      <h2 class="result__title" id="result-title"></h2>
+      <p class="result__body" id="result-body"></p>
+      <div class="result__stats" id="result-stats"></div>
+      <div class="result__actions">
+        <button class="btn btn--primary" id="btn-again">다시 잠입하기</button>
+        <button class="btn btn--ghost" id="btn-log">대화 기록 보기</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
